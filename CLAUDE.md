@@ -1,0 +1,409 @@
+
+使用ライブラリ：
+restyでリトライ cobra slog 
+
+要件：
+CLIアプリを作りたい。
+実装したいのは以下のコマンドです。
+getabc --title(-t) {string} --episode(-e) {number} --verbose(-v)
+
+前提：
+きちんとフォルダ分けしてください。
+きちんと型を生成してください。
+
+
+内部動作フロー：
+
+
+1. getabc --title(-t) {string} --episode(-e) {number} --verbose(-v) というコマンドをユーザーが入力する。
+
+例えば、getabc -t ぷり -e 10 -vと入力した場合、以下のURLのSearchの位置に-tで入力した文字を代入する。
+
+
+2. 以下のリクエストを送る。
+http://cal.syoboi.jp/json?Req=TitleSearch&Search={string}&Limit=15
+
+レスポンスは以下のような形式になります。
+```
+{
+  "Titles": {
+    "3434": {
+      "TID": "3434",
+      "Title": "プリパラ",
+      "ShortTitle": "",
+      "TitleYomi": "ぷりぱら",
+      "TitleEN": "PRIPARA",
+      "Cat": "10",
+      "FirstCh": "テレビ東京",
+      "FirstYear": "2014",
+      "FirstMonth": "7",
+      "FirstEndYear": "2017",
+      "FirstEndMonth": "3",
+      "TitleFlag": "0",
+      "Comment": "",
+      "Search": 1
+    },
+    "6727": {
+      "TID": "6727",
+      "Title": "スプリガン",
+      "ShortTitle": "",
+      "TitleYomi": "すぷりがん",
+      "TitleEN": "SPRIGGAN",
+      "Cat": "10",
+      "FirstCh": "Netflix",
+      "FirstYear": "2022",
+      "FirstMonth": "6",
+      "FirstEndYear": "2022",
+      "FirstEndMonth": "6",
+      "TitleFlag": "0",
+      "Comment": "",
+      "Search": 1
+    },
+    "6150": {
+      "TID": "6150",
+      "Title": "ワッチャプリマジ！",
+      "ShortTitle": "",
+      "TitleYomi": "わっちゃぷりまじ",
+      "TitleEN": "Waccha Primagi!",
+      "Cat": "10",
+      "FirstCh": "テレビ東京",
+      "FirstYear": "2021",
+      "FirstMonth": "10",
+      "FirstEndYear": "2022",
+      "FirstEndMonth": "10",
+      "TitleFlag": "0",
+      "Comment": "",
+      "Search": 1
+    },
+    "4600": {
+      "TID": "4600",
+      "Title": "KING OF PRISM by PrettyRhythm",
+      "ShortTitle": "KING OF PRISM",
+      "TitleYomi": "きんぐおぶぷりずむばいぷりてぃーりずむ",
+      "TitleEN": "",
+      "Cat": "8",
+      "FirstCh": "",
+      "FirstYear": "2016",
+      "FirstMonth": "1",
+      "FirstEndYear": null,
+      "FirstEndMonth": null,
+      "TitleFlag": "0",
+      "Comment": "",
+      "Search": 1
+    },
+    "4887": {
+      "TID": "4887",
+      "Title": "キラッとプリ☆チャン",
+      "ShortTitle": "",
+      "TitleYomi": "きらっとぷりちゃん",
+      "TitleEN": "",
+      "Cat": "10",
+      "FirstCh": "テレビ東京",
+      "FirstYear": "2018",
+      "FirstMonth": "4",
+      "FirstEndYear": "2021",
+      "FirstEndMonth": "5",
+      "TitleFlag": "0",
+      "Comment": "",
+      "Search": 2,
+      "Programs": [
+        {
+          "PID": "694128",
+          "TID": "4887",
+          "StTime": "1774432800",
+          "EdTime": "1774434600",
+          "ChID": "19",
+          "StOffset": "0",
+          "Count": "120",
+          "ProgComment": "",
+          "SubTitle": "",
+          "ChName": "TOKYO MX"
+        },
+        {
+          "PID": "694129",
+          "TID": "4887",
+          "StTime": "1775037600",
+          "EdTime": "1775039400",
+          "ChID": "19",
+          "StOffset": "0",
+          "Count": "121",
+          "ProgComment": "",
+          "SubTitle": "",
+          "ChName": "TOKYO MX"
+        }
+      ]
+    },
+    "7749": {
+      "TID": "7749",
+      "Title": "レプリカだって、恋をする。",
+      "ShortTitle": "",
+      "TitleYomi": "れぷりかだってこいをする",
+      "TitleEN": "Even a Replica Can Fall in Love",
+      "Cat": "1",
+      "FirstCh": "AT-X",
+      "FirstYear": "2026",
+      "FirstMonth": "4",
+      "FirstEndYear": null,
+      "FirstEndMonth": null,
+      "TitleFlag": "0",
+      "Comment": "",
+      "Search": 2,
+      "Programs": [
+        {
+          "PID": "699295",
+          "TID": "7749",
+          "StTime": "1774166400",
+          "EdTime": "1774168200",
+          "ChID": "178",
+          "StOffset": "0",
+          "Count": null,
+          "ProgComment": "https://www.youtube.com/watch?v=cNt4DP8mmQU (プレミア公開 終了時間未確認) 第1話「レプリカは、夢を見ない」オンライン先行上映　※静岡で実施するトークショーの配信はなし https://x.com/REPLICO_dengeki/status/2034558225790742722",
+          "SubTitle": "^TVアニメ「レプリカだって、恋をする。」第1話オンライン先行上映会",
+          "ChName": "YouTube"
+        },
+        {
+          "PID": "699294",
+          "TID": "7749",
+          "StTime": "1775041200",
+          "EdTime": "1775044800",
+          "ChID": "178",
+          "StOffset": "0",
+          "Count": null,
+          "ProgComment": "https://www.youtube.com/watch?v=55JmbpT9mo4 (終了時間未確認) 出演：諸星すみれ（ナオ/愛川素直 役）、高田憂希（広中律子 役）、名塚佳織（森すずみ 役）　MC：松井佐祐里 https://replico.jp/news/?id=260319_01",
+          "SubTitle": "^TVアニメ「レプリカだって、恋をする。」放送直前生放送",
+          "ChName": "YouTube"
+        }
+      ]
+    },
+    "2855": {
+      "TID": "2855",
+      "Title": "映画クレヨンしんちゃん 伝説を呼ぶブリブリ3分ポッキリ大進撃",
+      "ShortTitle": "",
+      "TitleYomi": "えいがくれよんしんちゃんでんせつをよぶぷりぶりさんぷんぽっきりだいしんげき",
+      "TitleEN": "",
+      "Cat": "8",
+      "FirstCh": "",
+      "FirstYear": "2005",
+      "FirstMonth": "4",
+      "FirstEndYear": null,
+      "FirstEndMonth": null,
+      "TitleFlag": "0",
+      "Comment": "",
+      "Search": 1
+    }
+  }
+}
+
+```
+
+3. 複数返却された場合
+
+例えば、上記はぷり、という単語を検索しているが、Titleフィールドを見ればわかるように、複数のタイトルがマッチしている。
+そのため、CLI上でユーザーにどのTitleを選択するか求めるUIを出す。
+
+4. 3.で取得したTIDとFirstChを利用して以下のAPIを叩きます。
+
+http://cal.syoboi.jp/db?Command=ProgLookup&TID={number}&ChID={number}&Count={number}&JOIN=SubTitles
+
+ChIDについてですが、FirstChを利用して以下のオブジェクトから取得してください。
+存在しない場合は、エラーメッセージを表示してください。
+*	ChID	ChGID	ChName
+1	1	11	NHK総合
+2	2	11	NHK Eテレ
+3	3	1	フジテレビ
+4	4	1	日本テレビ
+5	5	1	TBS
+6	6	1	テレビ朝日
+7	7	1	テレビ東京
+8	8	1	tvk
+9	9	9	NHK-BS1
+10	10	9	NHK-BS2
+11	11	2	NHK-BShi
+12	12	9	WOWOW
+13	13	1	チバテレビ
+14	14	1	テレ玉
+15	15	2	BSテレ東
+16	16	2	BS-TBS
+17	17	2	BSフジ
+18	18	2	BS朝日
+19	19	1	TOKYO MX
+20	20	6	AT-X
+
+Countについては、コマンドの--episode(-e)で入れられた値を入力してください。
+
+レスポンスは以下のようなXMLになります。
+ここで重要なのは、ProgItems内のStTime, EdTime, STSubTitleです。
+StTime: 放送開始時刻、EdTime: 放送終了時刻、STSubTitle: サブタイトル
+
+複数のProgItemsが返される場合は、Deletedフラグが0の一番最初のものを利用してください。
+```
+<ProgLookupResponse>
+<ProgItems>
+<ProgItem id="201585">
+<LastUpdate>2011-09-12 04:45:06</LastUpdate>
+<PID>201585</PID>
+<TID>1853</TID>
+<StTime>2011-07-18 16:30:00</StTime>
+<StOffset>0</StOffset>
+<EdTime>2011-07-18 17:00:00</EdTime>
+<Count>12</Count>
+<SubTitle/>
+<ProgComment/>
+<Flag>8</Flag>
+<Deleted>0</Deleted>
+<Warn>0</Warn>
+<ChID>19</ChID>
+<Revision>0</Revision>
+<STSubTitle>ドッキドキです！プロポーズ大作戦!!</STSubTitle>
+</ProgItem>
+<ProgItem id="535371">
+<LastUpdate>2021-01-07 19:07:10</LastUpdate>
+<PID>535371</PID>
+<TID>1853</TID>
+<StTime>2021-01-28 19:30:00</StTime>
+<StOffset>0</StOffset>
+<EdTime>2021-01-28 20:00:00</EdTime>
+<Count>12</Count>
+<SubTitle/>
+<ProgComment/>
+<Flag>8</Flag>
+<Deleted>0</Deleted>
+<Warn>0</Warn>
+<ChID>19</ChID>
+<Revision>4</Revision>
+<STSubTitle>ドッキドキです！プロポーズ大作戦!!</STSubTitle>
+</ProgItem>
+</ProgItems>
+<Result>
+<Code>200</Code>
+<Message/>
+</Result>
+</ProgLookupResponse>
+```
+
+3. 実況APIにリクエストを送る
+
+https://jikkyo.tsukumijima.net/api/kakolog/{jikkyoid:string}?starttime={unixtimestamp}&endtime={unixtimestamp}&format=json
+
+starttimeとendtimeはunixtimestampだが、先ほど入手したStTimeとEdTimeから計算して代入。
+jikkyoidはChIDから入手する。以下を参考にしてください。
+例えばNHK総合の場合、
+ChID:1 → NHK総合 → jk1 、よってjikkyoidはjk1となります。
+
+```
+地上波
+jk1 : NHK総合 - [ニコニコ実況] [NX-Jikkyo]
+jk2 : NHK Eテレ - [ニコニコ実況] [NX-Jikkyo]
+jk4 : 日本テレビ - [ニコニコ実況] [NX-Jikkyo]
+jk5 : テレビ朝日 - [ニコニコ実況] [NX-Jikkyo]
+jk6 : TBSテレビ - [ニコニコ実況] [NX-Jikkyo]
+jk7 : テレビ東京 - [ニコニコ実況] [NX-Jikkyo]
+jk8 : フジテレビ - [ニコニコ実況] [NX-Jikkyo]
+jk9 : TOKYO MX - [ニコニコ実況] [NX-Jikkyo]
+jk10 : テレ玉 - [NX-Jikkyo]
+jk11 : tvk - [NX-Jikkyo]
+jk12 : チバテレビ - [NX-Jikkyo]
+jk13 : サンテレビ - [ニコニコ実況] [NX-Jikkyo]
+jk14 : KBS京都 - [NX-Jikkyo]
+BS・CS
+jk101 : NHK BS - [ニコニコ実況] [NX-Jikkyo]
+jk103 : NHK BSプレミアム - [NX-Jikkyo]
+jk141 : BS日テレ - [NX-Jikkyo]
+jk151 : BS朝日 - [NX-Jikkyo]
+jk161 : BS-TBS - [NX-Jikkyo]
+jk171 : BSテレ東 - [NX-Jikkyo]
+jk181 : BSフジ - [NX-Jikkyo]
+jk191 : WOWOW PRIME - [NX-Jikkyo]
+jk192 : WOWOW LIVE - [NX-Jikkyo]
+jk193 : WOWOW CINEMA - [NX-Jikkyo]
+jk200 : BS10 - [NX-Jikkyo]
+jk201 : BS10スターチャンネル - [NX-Jikkyo]
+jk211 : BS11 - [ニコニコ実況] [NX-Jikkyo]
+jk222 : BS12 - [NX-Jikkyo]
+jk236 : BSアニマックス - [NX-Jikkyo]
+jk252 : WOWOW PLUS - [NX-Jikkyo]
+jk260 : BS松竹東急 - [NX-Jikkyo]
+jk263 : BSJapanext - [NX-Jikkyo]
+jk265 : BSよしもと - [NX-Jikkyo]
+jk333 : AT-X - [NX-Jikkyo]
+jk991 : 2026年 WBC 実況用特設チャンネル - [ニコニコ実況] [NX-Jikkyo]
+```
+
+```
+*	ChID	ChGID	ChName
+1	1	11	NHK総合
+2	2	11	NHK Eテレ
+3	3	1	フジテレビ
+4	4	1	日本テレビ
+5	5	1	TBS
+6	6	1	テレビ朝日
+7	7	1	テレビ東京
+8	8	1	tvk
+9	9	9	NHK-BS1
+10	10	9	NHK-BS2
+11	11	2	NHK-BShi
+12	12	9	WOWOW
+13	13	1	チバテレビ
+14	14	1	テレ玉
+15	15	2	BSテレ東
+16	16	2	BS-TBS
+17	17	2	BSフジ
+18	18	2	BS朝日
+19	19	1	TOKYO MX
+20	20	6	AT-X
+```
+
+レスポンスは以下のようになります。
+```
+{
+  "packet": [
+    {
+      "chat": {
+        "thread": "1606417201",
+        "no": "2750",
+        "vpos": "1440040",
+        "date": "1606431601",
+        "mail": "184",
+        "user_id": "mmJyd4lCsV6e3loLXR0QvZnlnFI",
+        "premium": "1",
+        "anonymity": "1",
+        "date_usec": "373180",
+        "content": "六甲おろし歌って"
+      }
+    },
+    {
+      "chat": {
+        "thread": "1606417201",
+        "no": "2751",
+        "vpos": "1440136",
+        "date": "1606431602",
+        "mail": "184",
+        "user_id": "Vz1E1ii0OXV1ApWddfG7niOSYak",
+        "anonymity": "1",
+        "date_usec": "183595",
+        "content": "ｷﾀ━━━━(ﾟ∀ﾟ)━━━━!!"
+      }
+    },
+```
+
+4. ｷﾀ、A、B、Cというコメントを探す
+
+上記のレスポンスのchat内で、contentがｷﾀ、A、B、Cのコメントを探します。
+それぞれ、実際の配信の開始位置、Aパートの開始位置、B、Cを意味します。
+また、ユーザーが間違って入力した場合もあるので、一番それらのコメントが多い秒数をdateから求めてください。
+
+5. コマンドのレスポンス
+
+以下のような形式でレスポンスを書く。
+`getabc -t ぷり -e 10 -v`と実行した場合
+
+```
+(title) プリパラ
+(episode) 10
+(subtitle) ドッキドキです！プロポーズ大作戦!!
+(start) 2021-01-28 19:30:00
+(real_start_time) 2021-01-28 19:30:30
+(A) 2021-01-28 19:35:00
+(B) 2021-01-28 19:40:00
+(C) 2021-01-28 19:45:00
+```

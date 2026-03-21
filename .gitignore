@@ -1,0 +1,35 @@
+# バイナリ
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# ビルド成果物
+*.out
+*.test
+
+# Go workspace
+go.work
+go.work.sum
+
+# vendor（使わない場合）
+vendor/
+
+# IDE / エディタ
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 環境変数ファイル
+.env
+
+# カバレッジ
+coverage.out
+
+*.log
