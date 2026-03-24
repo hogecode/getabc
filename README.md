@@ -2,6 +2,9 @@
 
 アニメ放送の「実際の開始時刻」、「A」「B」「C」パートの開始時刻を自動検出する CLI ツール
 
+https://github.com/user-attachments/assets/9571eba9-dfa7-4dc3-841e-009037bd7593
+
+
 ## 概要
 
 getabc は、アニメの放送タイトルとエピソード番号を指定すると、以下の情報を自動取得します：
