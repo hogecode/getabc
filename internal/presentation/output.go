@@ -35,4 +35,12 @@ func (of *OutputFormatter) PrintResult(result *models.GetABCResult) {
 	if result.C != "" {
 		fmt.Printf("(C) %s\n", result.C)
 	}
+
+	if result.ProgramFileName != "" {
+		fmt.Printf("(program_filename) %s\n", result.ProgramFileName)
+	}
+
+	if result.ProgramContent != "" {
+		fmt.Printf("(program_content) %s\n", result.ProgramContent)
+	}
 }

@@ -13,13 +13,14 @@ import (
 
 // CoreUseCase orchestrates the main workflow
 type CoreUseCase struct {
-	apiClient      *api.Client
-	logger         *slog.Logger
-	channelMapping models.ChannelMapping
-	titleSearch    *TitleSearchUseCase
-	programLookup  *ProgramLookupUseCase
-	jikkyoAnalysis *JikkyoAnalysisUseCase
-	input          io.Reader
+	apiClient       *api.Client
+	logger          *slog.Logger
+	channelMapping  models.ChannelMapping
+	titleSearch     *TitleSearchUseCase
+	programLookup   *ProgramLookupUseCase
+	jikkyoAnalysis  *JikkyoAnalysisUseCase
+	programFileGen  *ProgramFileGenerator
+	input           io.Reader
 }
 
 // NewCoreUseCase creates a new core use case
@@ -36,6 +37,7 @@ func NewCoreUseCase(client *api.Client, logger *slog.Logger, input io.Reader) *C
 		titleSearch:    NewTitleSearchUseCase(client, logger, input),
 		programLookup:  NewProgramLookupUseCase(client, logger, channelMapping),
 		jikkyoAnalysis: NewJikkyoAnalysisUseCase(client, logger),
+		programFileGen: NewProgramFileGenerator(logger),
 		input:          input,
 	}
 }
@@ -72,6 +74,23 @@ func (uc *CoreUseCase) Execute(titleQuery string, episode int) (*models.GetABCRe
 
 	// Step 5: Build result
 	result := uc.buildResult(title, episode, progItem, analysis)
+
+	// Step 6: Generate program info file
+	programFileInfo, err := uc.programFileGen.GenerateProgramFileInfo(
+		title.Title,
+		strconv.Itoa(episode),
+		progItem,
+		uc.channelMapping,
+		"", // outputDir will be handled by CLI
+	)
+	if err != nil {
+		uc.logger.Warn("failed to generate program file info",
+			slog.String("error", err.Error()))
+		// Continue without program file generation
+	} else {
+		result.ProgramFileName = programFileInfo.Filename
+		result.ProgramContent = programFileInfo.Content
+	}
 
 	uc.logger.Info("workflow completed successfully")
 

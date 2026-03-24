@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/hogecode/getabc/internal/api"
 	"github.com/hogecode/getabc/internal/presentation"
@@ -11,10 +13,11 @@ import (
 )
 
 var (
-	title   string
-	episode int
-	verbose bool
-	logFile string
+	title      string
+	episode    int
+	verbose    bool
+	logFile    string
+	outputDir  string
 )
 
 // getabcCmd represents the getabc command
@@ -65,6 +68,20 @@ func runGetABC() error {
 	outputter := presentation.NewOutputFormatter(verbose)
 	outputter.PrintResult(result)
 
+	// Write program info file if output directory is specified
+	if outputDir != "" && result.ProgramFileName != "" && result.ProgramContent != "" {
+		filePath := filepath.Join(outputDir, result.ProgramFileName)
+		err := os.WriteFile(filePath, []byte(result.ProgramContent), 0644)
+		if err != nil {
+			logger.Error("failed to write program info file",
+				slog.String("path", filePath),
+				slog.String("error", err.Error()))
+		} else {
+			logger.Info("program info file written successfully",
+				slog.String("path", filePath))
+		}
+	}
+
 	return nil
 }
 
@@ -89,6 +106,7 @@ func init() {
 	getabcCmd.Flags().IntVarP(&episode, "episode", "e", 0, "Episode number (required)")
 	getabcCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging")
 	getabcCmd.Flags().StringVarP(&logFile, "log-file", "l", "", "Log file path (optional)")
+	getabcCmd.Flags().StringVarP(&outputDir, "output-dir", "o", "", "Output directory for program info file (optional)")
 
 	// Mark required flags
 	getabcCmd.MarkFlagRequired("title")
