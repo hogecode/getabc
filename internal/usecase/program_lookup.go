@@ -29,27 +29,37 @@ func NewProgramLookupUseCase(client *api.Client, logger *slog.Logger, channelMap
 
 // LookupProgram fetches program information
 func (uc *ProgramLookupUseCase) LookupProgram(title *models.Title, episode int) (*models.ProgItem, string, error) {
-	// Check if FirstCh is empty (common for movies)
-	if title.FirstCh == "" {
-		return nil, "", fmt.Errorf("channel information not available - this title may be a movie or special content (TID: %s)", title.TID)
-	}
 
-	// Find channel by name
-	channel, ok := uc.channelMapping[title.FirstCh]
-	if !ok {
-		return nil, "", fmt.Errorf("unsupported channel: %s (supported channels: see README)", title.FirstCh)
-	}
+	uc.logger.Debug("looking up program with ChIDs", slog.String("title", title.TID))
 
-	uc.logger.Debug("found channel", slog.String("name", title.FirstCh), slog.Int("chid", channel.ChID))
-
-	// Call ProgLookup API
-	resp, err := uc.client.ProgLookup(title.TID, channel.ChID, episode)
+	// Call ProgLookup API with all fixed ChIDs (1-10) in a single request
+	// The API supports multiple ChIDs as comma-separated values: ChID=1,2,3,4,5,6,7,8,9,10
+	chIDsParam := "1,2,3,4,5,6,7,8,9,19" // Using 1-9 and 19 (TOKYO MX) as they are the main channels with good Jikkyo support
+	resp, err := uc.client.ProgLookup(title.TID, chIDsParam, episode)
 	if err != nil {
-		return nil, "", err
+		return nil, "", fmt.Errorf("failed to call ProgLookup API: %w", err)
 	}
 
 	if len(resp.ProgItems) == 0 {
-		return nil, "", fmt.Errorf("no programs found for TID: %s, episode: %d", title.TID, episode)
+		return nil, "", fmt.Errorf("no programs found for TID: %s, episode: %d across all fixed ChIDs (1-10)", title.TID, episode)
+	}
+
+	// Build JikkyoID mapping from channel mapping
+	var jikkyoIDMap = make(map[string]string) // ChID -> JikkyoID mapping
+	for channelName, channel := range uc.channelMapping {
+		jikkyoIDMap[strconv.Itoa(channel.ChID)] = channel.JikkyoID
+		uc.logger.Debug("built channel mapping", slog.String("channelName", channelName), slog.Int("chid", channel.ChID), slog.String("jikkyoid", channel.JikkyoID))
+	}
+
+	var allProgItems []models.ProgItem
+
+	// Collect all program items
+	for i := range resp.ProgItems {
+		allProgItems = append(allProgItems, resp.ProgItems[i])
+	}
+
+	if len(allProgItems) == 0 {
+		return nil, "", fmt.Errorf("no program items found in response for TID: %s, episode: %d", title.TID, episode)
 	}
 
 	// Find best non-deleted ProgItem
@@ -57,22 +67,17 @@ func (uc *ProgramLookupUseCase) LookupProgram(title *models.Title, episode int) 
 	var progItem *models.ProgItem
 	var fallbackProgItem *models.ProgItem
 
-	for i := range resp.ProgItems {
-		if resp.ProgItems[i].Deleted == 0 {
-			// Check if this channel has good Jikkyo support
-			// The current channel's JikkyoID is already determined from channel.JikkyoID
-			// But for multiple ProgItems from different ChIDs, we need to check each
-			progItemChID := resp.ProgItems[i].ChID
-			if progItemChID == strconv.Itoa(channel.ChID) {
-				// This is from the same channel we looked up
-				if config.IsPopularChannel(channel.JikkyoID) {
-					progItem = &resp.ProgItems[i]
-					break // Found a popular channel, use it
-				}
+	for i := range allProgItems {
+		if allProgItems[i].Deleted == 0 {
+			// Get the JikkyoID for this item
+			jikkyoID := jikkyoIDMap[allProgItems[i].ChID]
+			if jikkyoID != "" && config.IsPopularChannel(jikkyoID) {
+				progItem = &allProgItems[i]
+				break // Found a popular channel, use it
 			}
 			// Keep first non-deleted as fallback
 			if fallbackProgItem == nil {
-				fallbackProgItem = &resp.ProgItems[i]
+				fallbackProgItem = &allProgItems[i]
 			}
 		}
 	}
@@ -86,12 +91,22 @@ func (uc *ProgramLookupUseCase) LookupProgram(title *models.Title, episode int) 
 		return nil, "", fmt.Errorf("all program items are marked as deleted")
 	}
 
+	// Get the appropriate JikkyoID for the selected program
+	selectedJikkyoID := jikkyoIDMap[progItem.ChID]
+	if selectedJikkyoID == "" {
+		// Fallback to the mapped channel's JikkyoID if available
+		if channel, ok := uc.channelMapping[title.FirstCh]; ok {
+			selectedJikkyoID = channel.JikkyoID
+		}
+	}
+
 	uc.logger.Info("found program",
 		slog.String("sttime", progItem.StTime),
 		slog.String("edtime", progItem.EdTime),
-		slog.String("subtitle", progItem.STSubTitle))
+		slog.String("subtitle", progItem.STSubTitle),
+		slog.String("chid", progItem.ChID))
 
-	return progItem, channel.JikkyoID, nil
+	return progItem, selectedJikkyoID, nil
 }
 
 // ParseProgItemTimes parses StTime and EdTime from ProgItem and converts to Unix timestamps

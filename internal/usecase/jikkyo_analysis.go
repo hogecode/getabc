@@ -59,13 +59,14 @@ func (uc *JikkyoAnalysisUseCase) AnalyzeComments(jikkyoID string, stUnix, edUnix
 		if strings.Contains(content, "ｷﾀ") {
 			kitaMarkers[date]++
 		}
-		if strings.Contains(content, "A") || strings.HasPrefix(strings.TrimSpace(content), "A") {
+		trimmed := strings.TrimSpace(content)
+		if trimmed == "A" {
 			aMarkers[date]++
 		}
-		if strings.Contains(content, "B") || strings.HasPrefix(strings.TrimSpace(content), "B") {
+		if trimmed == "B" {
 			bMarkers[date]++
 		}
-		if strings.Contains(content, "C") || strings.HasPrefix(strings.TrimSpace(content), "C") {
+		if trimmed == "C" {
 			cMarkers[date]++
 		}
 	}

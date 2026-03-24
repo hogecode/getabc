@@ -6,7 +6,8 @@
       "Bash(go build:*)",
       "Bash(./getabc.exe --help)",
       "Bash(./getabc.exe getabc:*)",
-      "Bash(go test:*)"
+      "Bash(go test:*)",
+      "Skill(update-config)"
     ]
   }
 }
