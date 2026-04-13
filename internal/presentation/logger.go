@@ -24,6 +24,7 @@ func NewLogger(config LoggerConfig) (*slog.Logger, error) {
 	if config.Verbose {
 		level = slog.LevelDebug
 	} else {
+		// Default to Warn level, but allow warnings and errors to be logged
 		level = slog.LevelWarn
 	}
 
