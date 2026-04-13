@@ -1,4 +1,4 @@
-﻿package usecase
+package usecase
 
 import (
 	"log/slog"
@@ -73,17 +73,19 @@ func (uc *JikkyoAnalysisUseCase) AnalyzeComments(jikkyoID string, stUnix, edUnix
 
 	// Find the most common timestamp for each marker
 	analysis := &models.CommentAnalysis{
-		KitaTime: findMostCommonTime(kitaMarkers),
-		ATime:    findMostCommonTime(aMarkers),
-		BTime:    findMostCommonTime(bMarkers),
-		CTime:    findMostCommonTime(cMarkers),
+		KitaTime:       findMostCommonTime(kitaMarkers),
+		ATime:          findMostCommonTime(aMarkers),
+		BTime:          findMostCommonTime(bMarkers),
+		CTime:          findMostCommonTime(cMarkers),
+		JikkyoResponse: resp,
 	}
 
 	uc.logger.Info("comment analysis complete",
 		slog.Int64("kita_time", analysis.KitaTime),
 		slog.Int64("a_time", analysis.ATime),
 		slog.Int64("b_time", analysis.BTime),
-		slog.Int64("c_time", analysis.CTime))
+		slog.Int64("c_time", analysis.CTime),
+		slog.Any("analysis", analysis))
 
 	return analysis, nil
 }
