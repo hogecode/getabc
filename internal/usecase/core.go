@@ -73,7 +73,7 @@ func (uc *CoreUseCase) Execute(titleQuery string, episode int) (*models.JikkyoRe
 	}
 
 	// Step 5: Build result
-	result := uc.buildResult(title, episode, progItem, analysis)
+	result := uc.buildResult(title, episode, progItem, analysis, jikkyoID, stUnix, edUnix)
 
 	// Step 6: Generate program info file
 	programFileInfo, err := uc.programFileGen.GenerateProgramFileInfo(
@@ -89,9 +89,10 @@ func (uc *CoreUseCase) Execute(titleQuery string, episode int) (*models.JikkyoRe
 		// Continue without program file generation
 	} else {
 		result.ProgramFileName = programFileInfo.Filename
-		result.ProgramContent = programFileInfo.Content
+		result.ProgramContent = programFileInfo.Content	
 	}
-
+	
+    result.JikkyoID = jikkyoID
 	uc.logger.Info("workflow completed successfully")
 
 	return result, nil
@@ -103,16 +104,23 @@ func (uc *CoreUseCase) buildResult(
 	episode int,
 	progItem *models.ProgItem,
 	analysis *models.CommentAnalysis,
+	jikkyoID string,
+	stUnix int64,
+	edUnix int64,
 ) *models.JikkyoResult {
 
 	// Convert episode to int if needed
 	episodeInt, _ := strconv.Atoi(strconv.Itoa(episode))
 
 	result := &models.JikkyoResult{
-		Title:    title.Title,
-		Episode:  episodeInt,
-		SubTitle: progItem.STSubTitle,
-		Start:    progItem.StTime,
+		Title:          title.Title,
+		Episode:        episodeInt,
+		SubTitle:       progItem.STSubTitle,
+		Start:          progItem.StTime,
+		JikkyoResponse: analysis.JikkyoResponse,
+		JikkyoID:       jikkyoID,
+		StartTimeUnix:  stUnix,
+		EndTimeUnix:    edUnix,
 	}
 
 	// Calculate actual times based on comment markers

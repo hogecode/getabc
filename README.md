@@ -23,7 +23,7 @@ Error: required flag(s) "episode", "title" not set
 
 ### 実行例
 
-#### 1. シンプル実行
+#### 1. タイトルとエピソードを指定して検索
 
 ```bash
 > jikkyo -t フリーレン -e 10
@@ -36,6 +36,7 @@ Multiple titles found:
 2. 葬送のフリーレン(第2期) (TID: 7629)
 ```
 
+#### 2. 複数マッチする場合は選択
 ```bash
 Select (1-2): 1
 ```

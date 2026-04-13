@@ -2,14 +2,20 @@
 
 // JikkyoResult is the final output of jikkyo command
 type JikkyoResult struct {
-	Title           string // TV series title
-	Episode         int    // Episode number
-	SubTitle        string // Episode subtitle
-	Start           string // Broadcast start time in format "2006-01-02 15:04:05"
-	RealStartTime   string // Actual program start time (based on ｷﾀ comment) in format "2006-01-02 15:04:05"
-	A               string // A part start time in format "2006-01-02 15:04:05"
-	B               string // B part start time in format "2006-01-02 15:04:05"
-	C               string // C part start time in format "2006-01-02 15:04:05"
-	ProgramFileName string // Program info file name
-	ProgramContent  string // Program info file content
+	Title             string // TV series title
+	Episode           int    // Episode number
+	SubTitle          string // Episode subtitle
+	Start             string // Broadcast start time in format "2006-01-02 15:04:05"
+	RealStartTime     string // Actual program start time (based on ｷﾀ comment) in format "2006-01-02 15:04:05"
+	A                 string // A part start time in format "2006-01-02 15:04:05"
+	B                 string // B part start time in format "2006-01-02 15:04:05"
+	C                 string // C part start time in format "2006-01-02 15:04:05"
+	ProgramFileName   string // Program info file name
+	ProgramContent    string // Program info file content
+	JikkyoFileName    string // Jikkyo log file name (XML format)
+	JikkyoContent     string // Jikkyo log file content (XML format)
+	JikkyoResponse    *JikkyoResponse // Raw Jikkyo API response
+	JikkyoID          string // Jikkyo ID for API calls
+	StartTimeUnix     int64  // Program start time (Unix timestamp)
+	EndTimeUnix       int64  // Program end time (Unix timestamp)
 }

@@ -1,4 +1,4 @@
-﻿package usecase
+package usecase
 
 import (
 	"fmt"
@@ -48,7 +48,6 @@ func (g *ProgramFileGenerator) GenerateFilename(title string, episode string, pr
 	// Format: {year}{month}{day}{start}000102-{title} 第{episode_number}{subtitle}.ts.program.txt
 	// The "000102" appears to be a constant (possibly related to broadcast info)
 	// The title needs to be formatted with 第 (episode marker) and subtitle in 『 』 brackets
-
 	subtitle := progItem.STSubTitle
 	if subtitle == "" {
 		subtitle = ""
@@ -71,7 +70,6 @@ func (g *ProgramFileGenerator) GenerateFilename(title string, episode string, pr
 // {year}/{month}/{day}({week}) {start}～{end}
 // {channel}
 // {title}　第{episode}話『{subtitle}』[字]
-//
 func (g *ProgramFileGenerator) GenerateFileContent(
 	title string,
 	episode string,
